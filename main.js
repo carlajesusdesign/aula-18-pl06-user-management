@@ -1,23 +1,36 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import { setupCounter } from './counter.js'
+import { liPersonComponent } from "./components/LiPerson.js"
+import { getRandomUserData } from "./services/RandomUserAPI.js"
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+const personListElement = document.querySelector('ul')
 
-setupCounter(document.querySelector('#counter'))
+let personList = JSON.parse(localStorage.getItem('personList'))
+
+function setPersonList(person){
+  personList.push(person)
+  const newLiElement = liPersonComponent({person})
+  personListElement.appendChild(newLiElement)
+  document.querySelector('h1').textContent = `User List (${personList.length})`
+}
+
+
+// Async / Await
+async function getUserData(){
+  try {
+    if(!personList || personList.length === 0 ){
+      personList = await getRandomUserData()
+      localStorage.setItem('personList', JSON.stringify(personList))
+    }
+
+    personList.map(person => {
+      setPersonList(person)
+    })
+
+  } catch (error) {
+    console.warn(`Not available! ${error}`)
+  } finally {
+    console.log(personList)
+  }
+}
+
+getUserData()
+
